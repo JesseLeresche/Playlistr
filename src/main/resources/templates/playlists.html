@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:with="currentPage='playlists'" layout:decorator="layout">
+<head>
+    <title>Playlists</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<div class="container" layout:fragment="content" id="content">
+    <div class="page-header">
+        <h1>Playlists</h1>
+    </div>
+    <h2>Create a New Playlist</h2>
+    <form action="#" th:action="@{/playlists/new}" th:object="${newPlaylist}" method="post">
+        <input type="hidden" th:field="*{user.id}"/>
+        <div class="form-group">
+            <label th:for="*{title}">Playlist Title</label>
+            <input type="text" th:field="*{title}" class="form-control" placeholder="Playlist Title"/>
+        </div>
+        <button type="submit" class="btn btn-default">Add Playlist</button>
+    </form>
+
+    <h2>Or Edit a Current One</h2>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Image</th>
+            <th>Name</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="playlist : ${playlists}">
+            <td><img th:src="@{${playlist.picture_small}}"/></td>
+            <td class="middle-align"><a th:href="@{/playlists/{id}(id=${playlist.id})}" th:text="${playlist.title}"></a></td>
+            <td class="middle-align"><span th:if="${playlist.user.id  != newPlaylist.user.id and playlist.collaborative != true}" class="glyphicon glyphicon-lock" aria-hidden="true"></span></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

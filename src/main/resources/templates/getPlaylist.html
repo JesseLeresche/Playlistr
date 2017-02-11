@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:with="currentPage='playlists'" layout:decorator="layout">
+<head>
+    <title>Get Playlist</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<div layout:fragment="content" class="container" id="content">
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+
+        function songPreviewChange(selectElement) {
+            var selectName = selectElement.name + "";
+            var searchListIndex = selectName.substring(selectName.indexOf("[") + 1, selectName.indexOf("]"));
+            var previewSource = document.getElementById("preview[" + searchListIndex + "].id");
+            var trackIndex = selectElement.selectedIndex;
+            var searchList = [[${tracksList}]];
+            previewSource.src = searchList[searchListIndex].tracklist[trackIndex].preview;
+            previewSource.parentElement.load();
+        }
+
+        /*]]>*/
+    </script>
+    <div class="page-header">
+        <h1>Manage Playlist</h1>
+    </div>
+
+    <div th:if="${tracksList}">
+        <h2>Search Results</h2>
+        <form action="#" th:action="@{'/playlists/' + ${searchObject.id}}" th:object="${songsList}" method="post">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Artist - Song</th>
+                    <th>Preview</th>
+                    <th>Add?</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="tracks : ${tracksList}">
+                    <td class="middle-align">
+                    <span th:if="${#lists.isEmpty(tracks.tracklist)}">
+                        No Matches Found
+                    </span>
+                        <select class="form-control" th:if="${not #lists.isEmpty(tracks.tracklist)}"
+                                th:field="*{tracklist[__${tracksStat.index}__].id}" onchange="songPreviewChange(this)">
+                            <option th:each="track : ${tracks.tracklist}"
+                                    th:value="${track.id}"
+                                    th:text="${track.artist.name} + '-' + ${track.title}">Blur - Song 2
+                            </option>
+                        </select>
+                    </td>
+                    <td class="middle-align">
+                        <audio controls="controls" th:if="${not #lists.isEmpty(tracks.tracklist)}">
+                            <source th:id="'preview[' + ${tracksStat.index}+ '].id'" src=""
+                                    th:src="@{${tracks.tracklist[0].preview}}" type="audio/mpeg"/>
+                        </audio>
+                    </td>
+                    <td class="middle-align" th:if="${not #lists.isEmpty(tracks.tracklist)}">
+
+                        <input type="checkbox" th:field="*{tracklist[__${tracksStat.index}__].shouldAdd}"/>
+
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <button th:type="submit" type="submit" class="btn btn-default">Add</button>
+        </form>
+    </div>
+
+    <div th:if="${playlist}">
+
+        <h2>Add new Items</h2>
+        <form th:action="@{/playlists/search}" th:object="${searchObject}" action="#" method="post">
+            <div class="form-group">
+                <label th:for="*{id}" th:text="'Type in songs to add to ' + ${playlist.title}">Edit Playlist</label>
+                <textarea cols="40" rows="5" class="form-control" placeholder="Artist - Song Title"
+                          th:field="*{searchString}"></textarea>
+            </div>
+            <input th:type="hidden" th:field="*{id}" type="hidden"/>
+            <button type="submit" class="btn btn-default">Search</button>
+        </form>
+
+        <h1 th:text="'Edit ' + ${playlist.title}">Edit Playlist</h1>
+        <form th:action="@{'/playlists/' + ${searchObject.id}}" th:object="${playlist}" action="#" th:method="put">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Cover</th>
+                    <th>Title</th>
+                    <th>Artist</th>
+                    <th>Preview</th>
+                    <th>Keep</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="tracklist : *{tracks.tracklist}">
+                    <td><img src="http://placehold.it/350x150"
+                             th:src="@{*{tracks.tracklist[__${tracklistStat.index}__].album.cover_small}}"/></td>
+                    <td class="middle-align" th:text="*{tracks.tracklist[__${tracklistStat.index}__].title}">Test
+                        Title
+                    </td>
+                    <td class="middle-align" th:text="*{tracks.tracklist[__${tracklistStat.index}__].artist.name}">Test
+                        Name
+                    </td>
+                    <td class="middle-align">
+                        <audio controls="controls">
+                            <source src="" th:src="@{*{tracks.tracklist[__${tracklistStat.index}__].preview}}"
+                                    type="audio/mpeg"/>
+                        </audio>
+                    </td>
+                    <td class="middle-align">
+                        <input type="checkbox"
+                               th:field="*{tracks.tracklist[__${tracklistStat.index}__].shouldAdd}"/>
+                        <input type="hidden" th:field="*{tracks.tracklist[__${tracklistStat.index}__].id}"/></td>
+                </tr>
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-default">Edit</button>
+        </form>
+
+    </div>
+</div>
+</body>
+</html>

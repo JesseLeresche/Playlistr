@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:with="currentPage='home'" layout:decorator="layout">
+<head>
+    <title>Home</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<div class="container" layout:fragment="content">
+    <div class="page-header">
+        <h1>Welcome to the Deezer Playlist Creator</h1>
+    </div>
+    <p class="lead">This application was designed with two main objectives in mind:
+    <ol>
+        <li>To form a tutorial for Spring Boot, Spring MVC and Various front-end technologies</li>
+        <li>To allow users to bulk-create playlists on Deezer (As Deezer currently doesn't have this functionality)</li>
+    </ol>
+    </p>
+    <a th:if="${!isUserLoggedIn}" href="/authenticate" class="btn btn-default">Login to Deezer</a>
+</div>
+
+
+</body>
+</html>
