@@ -21,7 +21,8 @@ import static za.co.jesseleresche.helper.DataCreationHelper.createMockHttpSessio
 import static za.co.jesseleresche.helper.DataCreationHelper.createUser;
 
 /**
- * Created by jesse on 2016/11/10.
+ * This class tests the User Controller to ensure that it provides the required
+ * responses to the various endpoints on available.
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(UserController.class)

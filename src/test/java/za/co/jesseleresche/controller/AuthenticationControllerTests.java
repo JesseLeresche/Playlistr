@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * This class tests the Authentication Controller to ensure that it provides the required
- * responses to the various endpoints on available for the service
+ * responses to the various endpoints on available.
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(AuthenticationController.class)
