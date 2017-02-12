@@ -12,7 +12,7 @@ import za.co.jesseleresche.service.UserService;
 import javax.servlet.http.HttpSession;
 
 /**
- * Created by jesse on 2016/11/09.
+ * This is the controller for the user page mappings
  */
 @Controller
 @RequestMapping("/user")
