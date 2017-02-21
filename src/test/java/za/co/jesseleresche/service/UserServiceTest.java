@@ -3,6 +3,7 @@ package za.co.jesseleresche.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.web.client.RestOperations;
 import za.co.jesseleresche.model.User;
 
@@ -20,23 +21,23 @@ public class UserServiceTest {
 
     private UserService userService;
 
-    private RestOperations restOperations;
+    private OAuth2RestTemplate oAuth2RestTemplate;
 
     @Before
     public void setup(){
-        restOperations = Mockito.mock(RestOperations.class);
+        oAuth2RestTemplate = Mockito.mock(OAuth2RestTemplate.class);
 
         userService = new UserService();
-        userService.setRestOperations(restOperations);
+        userService.setoAuth2RestTemplate(oAuth2RestTemplate);
     }
 
     @Test
     public void testGetUserDetailsSuccess(){
         User mockUser = createUser();
 
-        when(restOperations.getForObject(anyString(), eq(User.class), anyString())).thenReturn(mockUser);
+        when(oAuth2RestTemplate.getForObject(anyString(), eq(User.class))).thenReturn(mockUser);
 
-        User returnedUser = userService.getUser("1");
+        User returnedUser = userService.getUser();
 
         assertNotNull(returnedUser);
         assertEquals(mockUser.getId(), returnedUser.getId());

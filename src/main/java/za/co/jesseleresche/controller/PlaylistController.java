@@ -2,11 +2,13 @@ package za.co.jesseleresche.controller;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import za.co.jesseleresche.model.*;
+import za.co.jesseleresche.model.Playlist;
+import za.co.jesseleresche.model.Playlists;
+import za.co.jesseleresche.model.SearchObject;
+import za.co.jesseleresche.model.Tracks;
 import za.co.jesseleresche.service.PlaylistService;
 import za.co.jesseleresche.service.UserService;
 
@@ -21,7 +23,6 @@ import java.util.List;
 @RequestMapping("/playlists")
 public class PlaylistController {
 
-    private static final String AUTHENTICATE = "/authenticate";
     private static final String PLAYLISTS = "/playlists/";
     private static final String REDIRECT = "redirect:";
     private static final String GET_PLAYLIST = "getPlaylist";
@@ -33,33 +34,18 @@ public class PlaylistController {
     private Logger logger = Logger.getLogger(PlaylistController.class);
 
     @GetMapping(value = {"", "/"})
-    public String getPlaylists(HttpSession httpSession, Model model) {
-        DeezerAuthentication deezerAuthentication = (DeezerAuthentication) httpSession.getAttribute("deezerAuthentication");
-        String view;
-        if (deezerAuthentication != null && deezerAuthentication.isValidToken()) {
-            Playlists playlists = playlistService.getPlaylists(deezerAuthentication.getAccessToken());
-            Playlist playlist = new Playlist(userService.getUser(deezerAuthentication.getAccessToken()));
-            model.addAttribute("playlists", playlists.getPlaylists());
-            model.addAttribute("newPlaylist", playlist);
-            view = "playlists";
-        } else {
-            view = getAuthenticateURL();
-        }
-        return view;
+    public String getPlaylists(Model model) {
+        Playlists playlists = playlistService.getPlaylists();
+        Playlist playlist = new Playlist(userService.getUser());
+        model.addAttribute("playlists", playlists.getPlaylists());
+        model.addAttribute("newPlaylist", playlist);
+        return "playlists";
     }
 
     @PostMapping(value = "/new")
-    public String createPlaylist(@ModelAttribute(value = "playlist") Playlist playlist, HttpSession httpSession) {
-        DeezerAuthentication deezerAuthentication = (DeezerAuthentication) httpSession.getAttribute("deezerAuthentication");
-        String redirectUrl;
-        if (deezerAuthentication != null && deezerAuthentication.isValidToken()){
-            Playlist createdPlaylist = playlistService.createPlaylist(playlist, deezerAuthentication.getAccessToken());
-            redirectUrl = REDIRECT + PLAYLISTS + createdPlaylist.getId();
-        } else {
-            redirectUrl = getAuthenticateURL();
-        }
-
-        return redirectUrl;
+    public String createPlaylist(@ModelAttribute(value = "playlist") Playlist playlist) {
+        Playlist createdPlaylist = playlistService.createPlaylist(playlist);
+        return REDIRECT + PLAYLISTS + createdPlaylist.getId();
     }
 
     @GetMapping(value = "/{playlistId}")
@@ -81,33 +67,14 @@ public class PlaylistController {
 
     @PostMapping(value = "/{playlistId}")
     public String addSongs(@ModelAttribute("songsList") Tracks songsList, @PathVariable("playlistId") Long playlistId, HttpSession httpSession) {
-        DeezerAuthentication deezerAuthentication = (DeezerAuthentication) httpSession.getAttribute("deezerAuthentication");
-        String redirectUrl;
-        if (deezerAuthentication != null && deezerAuthentication.isValidToken()) {
-            playlistService.addSongs(playlistId, songsList, deezerAuthentication.getAccessToken());
-            redirectUrl = PLAYLISTS + playlistId;
-        } else {
-            redirectUrl = AUTHENTICATE;
-        }
-        return REDIRECT + redirectUrl;
+        playlistService.addSongs(playlistId, songsList);
+        return REDIRECT + PLAYLISTS + playlistId;
     }
 
     @PutMapping(value = "/{playlistId}")
     public String editSongs(@ModelAttribute("playlist") Playlist playlist, @PathVariable("playlistId") Long playlistId, HttpSession httpSession) {
-        DeezerAuthentication deezerAuthentication = (DeezerAuthentication) httpSession.getAttribute("deezerAuthentication");
-        String redirectUrl;
-        if (deezerAuthentication != null && deezerAuthentication.isValidToken()){
-            playlistService.editPlaylist(playlistId, playlist, deezerAuthentication.getAccessToken());
-            redirectUrl = REDIRECT + PLAYLISTS + playlistId;
-        } else {
-            redirectUrl = getAuthenticateURL();
-        }
-        return redirectUrl;
-    }
-
-    private String getAuthenticateURL() {
-        logger.info("Deezer Token is invalid. Authenticating again.");
-        return REDIRECT + AUTHENTICATE;
+        playlistService.editPlaylist(playlistId, playlist);
+        return REDIRECT + PLAYLISTS + playlistId;
     }
 
     @Autowired

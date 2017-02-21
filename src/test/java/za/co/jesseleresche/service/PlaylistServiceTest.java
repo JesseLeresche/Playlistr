@@ -3,6 +3,7 @@ package za.co.jesseleresche.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.web.client.RestOperations;
 import za.co.jesseleresche.model.Playlist;
 import za.co.jesseleresche.model.Playlists;
@@ -24,25 +25,25 @@ import static za.co.jesseleresche.helper.DataCreationHelper.*;
  */
 public class PlaylistServiceTest {
 
-    private RestOperations restOperations;
+    private OAuth2RestTemplate oAuth2RestTemplate;
 
     private PlaylistService playlistService;
 
     @Before
     public void setup() {
-        restOperations = Mockito.mock(RestOperations.class);
+        oAuth2RestTemplate = Mockito.mock(OAuth2RestTemplate.class);
 
         playlistService = new PlaylistService();
-        playlistService.setRestOperations(restOperations);
+        playlistService.setOAuth2RestTemplate(oAuth2RestTemplate);
     }
 
     @Test
     public void testGetPlaylists() {
         Playlists playlists = createPlaylists(3);
 
-        when(restOperations.getForObject(anyString(), eq(Playlists.class), anyString())).thenReturn(playlists);
+        when(oAuth2RestTemplate.getForObject(anyString(), eq(Playlists.class))).thenReturn(playlists);
 
-        Playlists returnedPlaylists = playlistService.getPlaylists("token");
+        Playlists returnedPlaylists = playlistService.getPlaylists();
 
         assertNotNull(returnedPlaylists);
         assertEquals(3, returnedPlaylists.getPlaylists().size());
@@ -55,9 +56,9 @@ public class PlaylistServiceTest {
         Playlist playlist = createPlaylist();
         Playlist returnedPlaylist = createPlaylist();
 
-        when(restOperations.postForObject(anyObject(), eq(null), eq(Playlist.class), anyLong(), anyString(), anyString())).thenReturn(returnedPlaylist);
+        when(oAuth2RestTemplate.postForObject(anyObject(), eq(null), eq(Playlist.class), anyLong(), anyString())).thenReturn(returnedPlaylist);
 
-        Playlist mergedPlaylist = playlistService.createPlaylist(playlist, "");
+        Playlist mergedPlaylist = playlistService.createPlaylist(playlist);
 
         assertNotNull(playlist);
         assertEquals(returnedPlaylist.getId(), mergedPlaylist.getId());
@@ -69,7 +70,7 @@ public class PlaylistServiceTest {
     public void testGetPlaylist() {
         Playlist requestPlaylist = createPlaylist();
 
-        when(restOperations.getForObject(anyString(), eq(Playlist.class), anyLong())).thenReturn(requestPlaylist);
+        when(oAuth2RestTemplate.getForObject(anyString(), eq(Playlist.class), anyLong())).thenReturn(requestPlaylist);
 
         Playlist playlist = playlistService.getPlaylist(requestPlaylist.getId());
 
@@ -82,7 +83,7 @@ public class PlaylistServiceTest {
         String searchSongs = "Adele - Hello\nNirvana - Smells like teen spirit\nBlur - Song 2";
         Tracks tracks = createTracks(3, true);
 
-        when(restOperations.getForObject(anyString(), anyObject())).thenReturn(tracks);
+        when(oAuth2RestTemplate.getForObject(anyString(), anyObject())).thenReturn(tracks);
 
         List<Tracks> returnedTracks = playlistService.searchForSongs(searchSongs);
 
@@ -95,17 +96,17 @@ public class PlaylistServiceTest {
     public void testAddSongsToPlaylist() {
         Playlist playlist = createPlaylist(1L, true);
 
-        playlistService.addSongs(playlist.getId(), playlist.getTracks(), "");
+        playlistService.addSongs(playlist.getId(), playlist.getTracks());
 
-        verify(restOperations, times(1)).postForObject(anyString(), eq(null), eq(Boolean.class), eq(playlist.getId()), anyString(), anyString());
+        verify(oAuth2RestTemplate, times(1)).postForObject(anyString(), eq(null), eq(Boolean.class), eq(playlist.getId()), anyString());
     }
 
     @Test
     public void testEditPlaylist() {
         Playlist playlist = createPlaylist(1L, false);
 
-        playlistService.editPlaylist(playlist.getId(), playlist, "");
+        playlistService.editPlaylist(playlist.getId(), playlist);
 
-        verify(restOperations, times(1)).delete(anyString(), eq(playlist.getId()), anyString(), anyString());
+        verify(oAuth2RestTemplate, times(1)).delete(anyString(), eq(playlist.getId()), anyString());
     }
 }

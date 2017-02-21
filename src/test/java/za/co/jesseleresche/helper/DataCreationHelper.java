@@ -11,8 +11,6 @@ import java.util.List;
  */
 public class DataCreationHelper {
 
-    private static DeezerAuthentication deezerAuthentication;
-
     public static Playlist createPlaylist() {
         return createPlaylist(1L, true);
     }
@@ -69,20 +67,6 @@ public class DataCreationHelper {
             tracksList.add(createTracks(numberOfTracks, true));
         }
         return tracksList;
-    }
-
-    public static DeezerAuthentication createDeezerAuthentication(){
-        if (deezerAuthentication == null){
-            deezerAuthentication = new DeezerAuthentication("1234", 3600L);
-        }
-        return deezerAuthentication;
-    }
-
-//    TODO: Make this a singleton
-    public static MockHttpSession createMockHttpSession(){
-        MockHttpSession mockHttpSession = new MockHttpSession();
-        mockHttpSession.setAttribute("deezerAuthentication", createDeezerAuthentication());
-        return mockHttpSession;
     }
 
 }

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      th:with="currentPage='home'" layout:decorator="layout">
+      th:with="currentPage='home'" layout:decorator="layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
 <head>
     <meta charset="UTF-8"/>
     <title>Playlistr</title>
@@ -37,7 +38,7 @@
                 <ul class="nav navbar-nav">
                     <li th:classappend="${currentPage == 'home'} ? 'active'"><a href="/">Home</a></li>
                     <li th:classappend="${currentPage == 'playlists'} ? 'active'"><a href="/playlists">Playlists</a></li>
-                    <li th:classappend="${currentPage == 'me'} ? 'active'"><a href="/user">Me</a></li>
+                    <li th:classappend="${currentPage == 'me'} ? 'active'"><a href="/user/me">Me</a></li>
                     <li th:classappend="${currentPage == 'about'} ? 'active'"><a href="/about">About</a></li>
                 </ul>
             </div><!--/.nav-collapse -->
@@ -68,9 +69,9 @@
 
     </div>
 
-    <div th:switch="${isUserLoggedIn}">
-        <p th:case="false">In order to get started you will need to <a href="/authenticate" class="btn btn-default">Login to Deezer</a> and provide permission for this site to your Deezer account.</p>
-        <p th:case="true">You are already logged in. <a href="/logout" class="btn btn-default">Logout</a> to clear your data or to login with a different account</p>
+    <div>
+        <p sec:authorize="!isAuthenticated()">In order to get started you will need to <a href="/login/deezer" class="btn btn-default">Login to Deezer</a> and provide permission for this site to your Deezer account.</p>
+        <form sec:authorize="isAuthenticated()" method="post" th:action="@{/logout}" class="form-inline"><div class="form-group"><p>You are already logged in.<input type="submit" value="Logout" class="btn btn-default"/> to clear your data or to login with a different account</p></div></form>
         <p><strong>NOTE:</strong> Apart from storing your access token (in order to communicate with Deezer) for your session, this site does not store any other data about you. Rather, it simply provides an interface to Deezer.</p>
     </div>
 

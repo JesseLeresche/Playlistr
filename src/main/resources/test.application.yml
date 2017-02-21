@@ -1,0 +1,15 @@
+server:
+  port: 9000
+
+deezer:
+  client:
+    clientId:
+    clientSecret:
+    accessTokenUri: https://connect.deezer.com/oauth/access_token.php
+    userAuthorizationUri: https://connect.deezer.com/oauth/auth.php?
+    authenticationScheme: query
+    clientAuthenticationScheme: query
+  resource:
+    userInfoUri: http://api.deezer.com/user/me
+  base:
+    url: http://api.deezer.com

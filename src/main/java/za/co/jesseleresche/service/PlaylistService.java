@@ -1,7 +1,9 @@
 package za.co.jesseleresche.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestOperations;
 import za.co.jesseleresche.model.Playlist;
@@ -20,17 +22,17 @@ import java.util.List;
 @Service
 public class PlaylistService {
 
-    private RestOperations restOperations;
+    private OAuth2RestTemplate oAuth2RestTemplate;
 
     @Value("${deezer.base.url}")
     private String deezerUrl;
 
-    public Playlists getPlaylists(String accessToken) {
-        return restOperations.getForObject(deezerUrl + "/user/me/playlists?access_token={accessToken}", Playlists.class, accessToken);
+    public Playlists getPlaylists() {
+        return oAuth2RestTemplate.getForObject(deezerUrl +"/user/me/playlists", Playlists.class);
     }
 
-    public Playlist createPlaylist(Playlist playlist, String accessToken) {
-        Playlist returnedPlaylist = restOperations.postForObject(deezerUrl + "/user/{userId}/playlists?title={title}&access_token={accessToken}", null, Playlist.class, playlist.getUser().getId(), playlist.getTitle(), accessToken);
+    public Playlist createPlaylist(Playlist playlist) {
+        Playlist returnedPlaylist = oAuth2RestTemplate.postForObject(deezerUrl + "/user/{userId}/playlists?title={title}", null, Playlist.class, playlist.getUser().getId(), playlist.getTitle());
         playlist.setId(returnedPlaylist.getId());
         return playlist;
     }
@@ -42,21 +44,21 @@ public class PlaylistService {
             String artist = "\"" + row.substring(0, row.indexOf("-")).trim() + "\"";
             String song = "\"" + row.substring(row.indexOf("-") + 1).trim() + "\"";
             String queryParam = "/search?q=artist:" + artist + " track:" + song + "&order=RANKING";
-            Tracks tracks = restOperations.getForObject(deezerUrl + queryParam, Tracks.class);
+            Tracks tracks = oAuth2RestTemplate.getForObject(deezerUrl + queryParam, Tracks.class);
             tracksList.add(tracks);
         }
         return tracksList;
     }
 
-    public Boolean addSongs(Long playlistId, Tracks songsList, String accessToken) {
+    public Boolean addSongs(Long playlistId, Tracks songsList) {
         String trackIds = normaliseSongsList(songsList, true);
-        return restOperations.postForObject(deezerUrl + "/playlist/{playlistId}/tracks?access_token={accessToken}&songs={songs}", null, Boolean.class, playlistId, accessToken, trackIds);
+        return oAuth2RestTemplate.postForObject(deezerUrl + "/playlist/{playlistId}/tracks?&songs={songs}", null, Boolean.class, playlistId, trackIds);
     }
 
 
-    public void editPlaylist(Long playlistId, Playlist playlist, String accessToken) {
+    public void editPlaylist(Long playlistId, Playlist playlist) {
         String trackIds = normaliseSongsList(playlist.getTracks(), false);
-        restOperations.delete(deezerUrl + "/playlist/{playlistId}/tracks?access_token={accessToken}&songs={songs}", playlistId, accessToken, trackIds);
+        oAuth2RestTemplate.delete(deezerUrl + "/playlist/{playlistId}/tracks?songs={songs}", playlistId, trackIds);
     }
 
     private String normaliseSongsList(Tracks songsList, Boolean isAddOperation) {
@@ -74,12 +76,12 @@ public class PlaylistService {
     }
 
     public Playlist getPlaylist(Long playlistId) {
-        return restOperations.getForObject(deezerUrl + "/playlist/{playlistId}", Playlist.class, playlistId);
+        return oAuth2RestTemplate.getForObject(deezerUrl + "/playlist/{playlistId}", Playlist.class, playlistId);
     }
+
 
     @Autowired
-    public void setRestOperations(RestOperations restOperations) {
-        this.restOperations = restOperations;
+    public void setOAuth2RestTemplate(OAuth2RestTemplate oAuth2RestTemplate) {
+        this.oAuth2RestTemplate = oAuth2RestTemplate;
     }
-
 }
